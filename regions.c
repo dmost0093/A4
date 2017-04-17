@@ -34,6 +34,7 @@ struct REGION
 // VARIABLES
 //-------------------------------------------------------------------------------------
 static struct Node *curr = NULL;//currently chosen region
+static struct Node *head = NULL;//head of the region list
 //-------------------------------------------------------------------------------------
 // PROTOTYPES
 //-------------------------------------------------------------------------------------
@@ -49,4 +50,43 @@ void rdump(void);
 // FUNCTIONS
 //-------------------------------------------------------------------------------------
 
+//Create and initialize a region with the given name and the given size
+Boolean rinit(const char * region_name, r_size_t region_size)
+{
+    Boolean result;//return value
+    //check the name of the region is already used or not
+    struct Node *curr = head;
+    Region *check = &curr->data;//datat store in the current node
+    if(curr == NULL)
+    {//list is empty
+        result = true;
+    }
+    else
+    {
+        while(curr->next != NULL)
+        {
+            if(check->name == region_name)
+            {//case the region name used already.
+                printf("The region name %s is already used", region_name);
+                result = false;
+                return result;//return false
+            }
+            //update the current node and data stored in node
+            curr = curr->next;
+            check = &curr->data;
+        }
+    }
+    //create new region
+    Region newRegion;
+    newRegion.name = region_name;
+    newRegion.size = region_size;
+    newRegion.occupied = 0;
 
+    //create new node
+    struct Node *newNode = (struct Node) malloc(sizeof(struct Node));
+    newNode.data = newRegion;
+    newNode.next = head;
+    head = newNode;
+    result = true;
+    return result;
+}
