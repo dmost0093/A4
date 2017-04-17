@@ -14,7 +14,22 @@
 //-------------------------------------------------------------------------------------
 // CONSTANTS and TYPES
 //-------------------------------------------------------------------------------------
-
+typedef enum BOOL{false, true} Boolean;
+typedef unsigned short r_size_t;
+typedef struct NODE node;
+typedef struct REGION Region;
+struct NODE
+{
+    Region data;//data that stored in the node
+    struct Node * next;//next Node
+}
+struct REGION
+{
+    const char *name;//name of the memory region
+    r_size_t size;//maximum memory that can be store
+    r_size_t occupied;//total memory that been occupied
+    char **memory;//momory of the region store
+}
 //-------------------------------------------------------------------------------------
 // VARIABLES
 //-------------------------------------------------------------------------------------
