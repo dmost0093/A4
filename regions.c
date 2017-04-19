@@ -33,7 +33,7 @@ struct Node
 struct Node_m
 {//link list for the memory block 
     struct Node_m *next;
-    r_size_t memory;
+    r_size_t sizeOfBlock;//size of the block been allocated
 };
 //-------------------------------------------------------------------------------------
 // VARIABLES
@@ -151,4 +151,34 @@ Boolean rchoose(const char *region_name)
     result = true;
     return result;
 
+}
+//Allocate a block that is the given number of bytes.
+void *ralloc(r_size_t block_size)
+{
+    void *result_ptr;
+    struct Node *curr = currNode;
+    if(block_size <= 0 || curr->data.size < curr->data.occupied + block_size)
+    {//case the given size of the block is 0
+    //case that occupied memory size reach or will over the maximum size of memory
+        return NULL;
+    }
+    else
+    {
+        if(curr->data.occupied == 0)
+        {
+            curr->data.memory->sizeOfBlock = block_size;
+            curr->data.occupied += block_size;
+        }
+        else
+        {
+            struct Node_m *newBlock = (struct Node_m*) malloc(sizeOf(struct Node_m));
+            newBlock->sizeOfBlock = block_size;
+            newBlock->next = NULL;
+            curr->data.memory->next = newBlock;
+            curr->data.occupied += block_size;
+            result_ptr = newBlock;
+        }
+        
+    }
+    return result_ptr;
 }
