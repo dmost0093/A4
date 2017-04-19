@@ -118,4 +118,8 @@ Boolean rinit(const char * region_name, r_size_t region_size)
         return result;
     }
 }
-
+//function that return the name of the currently-chosen region
+const char *rchosen()
+{
+    return currNode->data.name;
+}
