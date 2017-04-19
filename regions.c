@@ -123,3 +123,32 @@ const char *rchosen()
 {
     return currNode->data.name;
 }
+/*Function to choose a previously-initialized memory region 
+for other functions. Return false on error.*/
+Boolean rchoose(const char *region_name)
+{
+    Boolean result = false;
+    struct Node *curr = head;
+    if(head == NULL)
+    {//case the list of the region is empty
+        return result;
+    }
+    //navigate through list
+    while(curr->data.name != region_name)
+    {
+        //if it is last element(node) in list of regions
+        if(curr->next == NULL)
+        {
+            return result;
+        }
+        else
+        {//go to next next element(node)
+            curr = curr->next;
+        }
+    }
+    //if data found, update the currently chosen region
+    currNode = curr;
+    result = true;
+    return result;
+
+}
