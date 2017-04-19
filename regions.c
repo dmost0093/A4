@@ -23,18 +23,24 @@ struct REGION
     const char *name;//name of the memory region
     r_size_t size;//maximum memory that can be store
     r_size_t occupied;//total memory that been occupied
-    char **memory;//momory of the region store
+    struct Node_m *memory;//momory of the region store(head of list)
 };
 struct Node 
 {
    Region data;//data that stored in the node
    struct Node *next;
 };
+struct Node_m
+{//link list for the memory block 
+    struct Node_m *next;
+    r_size_t memory;
+};
 //-------------------------------------------------------------------------------------
 // VARIABLES
 //-------------------------------------------------------------------------------------
 static struct Node *currNode = NULL;//currently chosen region
 static struct Node *head = NULL;//head of the region list
+static int numOfr = 0;//number of the region created
 //-------------------------------------------------------------------------------------
 // PROTOTYPES
 //-------------------------------------------------------------------------------------
@@ -59,11 +65,13 @@ Boolean rinit(const char * region_name, r_size_t region_size)
     { //case 0 number of region.
         result = true;
         //create new region
-        char newMemory[1][region_size];
         Region newRegion;
         newRegion.name = region_name;
         newRegion.size = region_size;
         newRegion.occupied = 0;
+        struct Node_m *newMemory = (struct Node_m*) malloc(sizeof(struct Node_m));
+        newMemory->memory = 0;
+        newMemory->next = NULL;
         newRegion.memory = newMemory;
         //create new node
         struct Node *newNode = (struct Node*) malloc(sizeof(struct Node));
@@ -91,11 +99,13 @@ Boolean rinit(const char * region_name, r_size_t region_size)
         }
         
         //create new region
-        char newMemory[1][region_size];
         Region newRegion;
         newRegion.name = region_name;
         newRegion.size = region_size;
         newRegion.occupied = 0;
+        struct Node_m *newMemory = (struct Node_m*) malloc(sizeof(struct Node_m));
+        newMemory->memory = 0;
+        newMemory->next = NULL;
         newRegion.memory = newMemory;
         //create new node
         struct Node *newNode = (struct Node*) malloc(sizeof(struct Node));
@@ -104,8 +114,8 @@ Boolean rinit(const char * region_name, r_size_t region_size)
         head = newNode;
         currNode = newNode;
         numOfr++;
-        printList();
         result = true;
         return result;
     }
 }
+
