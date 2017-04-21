@@ -203,4 +203,69 @@ r_size_t rsize(void *block_ptr)
     r_size_t result = pointer->sizeOfBlock;
     return result;
 }
-
+//Destroy the region with the given name, freeing all memory associated with it. 
+void rdestroy(const char *region_name)
+{
+    if(head == NULL)
+    {//case there is 0 regions.
+        return ;
+    }
+    struct Node *temp = head;//the node from list that store data for region
+    struct Node_m *blockD;//block that will be destroyed
+    Region regionD; //region that will be destroyed
+    if(head->data.name == region_name||currNode->data.name == region_name)
+    {//case destroying head or currently selected region
+        //change the head to next node.
+        if(head->data.name == region_name)
+        {
+            temp = head;
+            regionD = temp->data;
+            head = head->next;
+        }
+        //change the currNode(currently selected region) to head.
+        if(currNode->data.name == region_name)
+        {
+            temp = currNode;
+            regionD = temp->data;
+            currNode = head;
+        }
+        
+        //destroy the all the block in the region
+        while(regionD.block->next != NULL)
+        {
+            blockD = regionD.block;
+            regionD.block = regionD.block->next;
+            free(blockD);
+        }
+        free(temp);
+    }
+    else
+    {
+        //find the region that given by the region name
+        while(temp->data.name != region_name)
+        {
+            //if it is last node
+            if(temp->next == NULL)
+            {
+                printf("Enter wrong region name or regions is not appear in the list");
+                return ;
+            }
+            else
+            {
+                temp = temp->next;
+            }
+        }
+        //update the region and block need to be destroy
+        regionD = temp->data;
+        blockD = regionD.block;
+        //destroy the block in region
+        while(regionD.block->next != NULL)
+        {
+            blockD = regionD.block;
+            regionD.block = regionD.block->next;
+            free(blockD);
+        }
+        free(temp);
+    }
+    return ;
+}
