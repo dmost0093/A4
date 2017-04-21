@@ -196,7 +196,6 @@ void *ralloc(r_size_t block_size)
 r_size_t rsize(void *block_ptr)
 {
     struct Node_m *pointer = (struct Node_m*)block_ptr;
-    printf("Occupied(stored in block): %d\n", pointer->sizeOfBlock);
     r_size_t result = pointer->sizeOfBlock;
     return result;
 }
@@ -274,13 +273,14 @@ void rdump(void)
         return ;
     }
     struct Node *curr = head;
-    int freeSpace = curr->data.size - curr->data.occupied;
-    int freeSpaceP = (freeSpace / curr->data.size) * 100;
+    int freeSpace, freeSpaceP;
     while(curr != NULL)
     {
         //print basic information
+        freeSpace = curr->data.size - curr->data.occupied;
+        freeSpaceP = (freeSpace / curr->data.size) * 100;
         printf("Name of Region: %s, Maximum Size of Region: %d, Memory been occuppied: %d", curr->data.name, curr->data.size, curr->data.occupied);
-        printf("Free space: %d(%d%%)",freeSpace, freeSpaceP);
+        printf(" Free space: %d(%d%%)\n",freeSpace, freeSpaceP);
         curr = curr->next;
     }
     
