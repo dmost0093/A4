@@ -190,14 +190,11 @@ void *ralloc(r_size_t block_size)
         }
         
     }
-    printf("Name: %s, Occupied(store in region): %d, Occupied(stored in block): %d\n",curr->data.name,curr->data.occupied,curr->data.block->sizeOfBlock);
-    printf("%p\n",result_ptr);
     return result_ptr;
 }
 //Find out how many of memory been allocated inside a block
 r_size_t rsize(void *block_ptr)
 {
-    printf("%p\n",block_ptr);
     struct Node_m *pointer = (struct Node_m*)block_ptr;
     printf("Occupied(stored in block): %d\n", pointer->sizeOfBlock);
     r_size_t result = pointer->sizeOfBlock;
@@ -268,4 +265,23 @@ void rdestroy(const char *region_name)
         free(temp);
     }
     return ;
+}
+void rdump(void)
+{
+    if(head == NULL)
+    {//case there is no region to print
+        printf("There is no region to print");
+        return ;
+    }
+    struct Node *curr = head;
+    int freeSpace = curr->data.size - curr->data.occupied;
+    int freeSpaceP = (freeSpace / curr->data.size) * 100;
+    while(curr != NULL)
+    {
+        //print basic information
+        printf("Name of Region: %s, Maximum Size of Region: %d, Memory been occuppied: %d", curr->data.name, curr->data.size, curr->data.occupied);
+        printf("Free space: %d(%d%%)",freeSpace, freeSpaceP);
+        curr = curr->next;
+    }
+    
 }
