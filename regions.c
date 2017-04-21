@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
+#include <assert.h>
 //-------------------------------------------------------------------------------------
 // CONSTANTS and TYPES
 //-------------------------------------------------------------------------------------
@@ -23,7 +23,7 @@ struct REGION
     const char *name;//name of the memory region
     r_size_t size;//maximum memory that can be store
     r_size_t occupied;//total memory that been occupied
-    struct Node_m *memory;//momory of the region store(head of list)
+    struct Node_m *block;//block of the memory store(head of blocks)
 };
 struct Node 
 {
@@ -69,10 +69,10 @@ Boolean rinit(const char * region_name, r_size_t region_size)
         newRegion.name = region_name;
         newRegion.size = region_size;
         newRegion.occupied = 0;
-        struct Node_m *newMemory = (struct Node_m*) malloc(sizeof(struct Node_m));
-        newMemory->memory = 0;
-        newMemory->next = NULL;
-        newRegion.memory = newMemory;
+        struct Node_m *newBlock = (struct Node_m*) malloc(sizeof(struct Node_m));
+        newBlock->sizeOfBlock = 0;
+        newBlock->next = NULL;
+        newRegion.block = newBlock;
         //create new node
         struct Node *newNode = (struct Node*) malloc(sizeof(struct Node));
         newNode->data = newRegion;
@@ -103,10 +103,10 @@ Boolean rinit(const char * region_name, r_size_t region_size)
         newRegion.name = region_name;
         newRegion.size = region_size;
         newRegion.occupied = 0;
-        struct Node_m *newMemory = (struct Node_m*) malloc(sizeof(struct Node_m));
-        newMemory->memory = 0;
-        newMemory->next = NULL;
-        newRegion.memory = newMemory;
+        struct Node_m *newBlock = (struct Node_m*) malloc(sizeof(struct Node_m));
+        newBlock->sizeOfBlock = 0;
+        newBlock->next = NULL;
+        newRegion.block = newBlock;
         //create new node
         struct Node *newNode = (struct Node*) malloc(sizeof(struct Node));
         newNode->data = newRegion;
@@ -155,8 +155,9 @@ Boolean rchoose(const char *region_name)
 //Allocate a block that is the given number of bytes.
 void *ralloc(r_size_t block_size)
 {
-    void *result_ptr;
+    void *result_ptr = (struct Node_m*) malloc(sizeof(struct Node_m));
     struct Node *curr = currNode;
+    assert(curr != NULL);
     if(block_size <= 0 || curr->data.size < curr->data.occupied + block_size)
     {//case the given size of the block is 0
     //case that occupied memory size reach or will over the maximum size of memory
@@ -166,19 +167,31 @@ void *ralloc(r_size_t block_size)
     {
         if(curr->data.occupied == 0)
         {
-            curr->data.memory->sizeOfBlock = block_size;
+            curr->data.block->sizeOfBlock = block_size;
             curr->data.occupied += block_size;
         }
         else
         {
-            struct Node_m *newBlock = (struct Node_m*) malloc(sizeOf(struct Node_m));
+            struct Node_m *newBlock = (struct Node_m*) malloc(sizeof(struct Node_m));
             newBlock->sizeOfBlock = block_size;
             newBlock->next = NULL;
-            curr->data.memory->next = newBlock;
+            curr->data.block->next = newBlock;
             curr->data.occupied += block_size;
             result_ptr = newBlock;
         }
         
     }
+    printf("Name: %s, Occupied(store in region): %d, Occupied(stored in block): %d\n",curr->data.name,curr->data.occupied,curr->data.block->sizeOfBlock);
+    printf("%p\n",result_ptr);
     return result_ptr;
 }
+//Find out how many of memory been allocated inside a block
+r_size_t rsize(void *block_ptr)
+{
+    printf("%p\n",block_ptr);
+    struct Node_m *pointer = (struct Node_m*)block_ptr;
+    printf("Occupied(stored in block): %d\n", pointer->sizeOfBlock);
+    r_size_t result = pointer->sizeOfBlock;
+    return result;
+}
+
