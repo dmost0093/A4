@@ -167,7 +167,7 @@ void *ralloc(r_size_t block_size)
     void *result_ptr = (struct Node_m*) malloc(sizeof(struct Node_m));
     struct Node *curr = currNode;
     assert(curr != NULL);
-    if(block_size <= 0 || curr->data.size < curr->data.occupied + block_size)
+    if(block_size <= 0 || curr->data.size < (curr->data.occupied) + block_size)
     {//case the given size of the block is 0
     //case that occupied memory size reach or will over the maximum size of memory
         return NULL;
@@ -178,6 +178,7 @@ void *ralloc(r_size_t block_size)
         {
             curr->data.block->sizeOfBlock = block_size;
             curr->data.occupied += block_size;
+            result_ptr = curr->data.block;
         }
         else
         {
@@ -195,8 +196,34 @@ void *ralloc(r_size_t block_size)
 //Find out how many of memory been allocated inside a block
 r_size_t rsize(void *block_ptr)
 {
-    struct Node_m *pointer = (struct Node_m*)block_ptr;
+    struct Node_m *pointer = block_ptr;
+    if(pointer == NULL)
+    {
+        return 0;
+    }
     r_size_t result = pointer->sizeOfBlock;
+    return result;
+}
+//Frees the block identified by the given pointer in the currently chosen region
+Boolean rfree(void *block_ptr)
+{
+    Boolean result;
+    result = false;
+    struct Node_m* temp = NULL;
+    struct Node_m* curr = curr->data.block;
+    if(curr == (struct Node_m*)block_ptr)
+    {
+        currNode->data.block = currNode->data.block->next;
+        free(block_ptr);
+    }
+    else
+    {
+        temp = (struct Node_m*)block_ptr;
+        while(temp != curr)
+        {
+            
+        }
+    }
     return result;
 }
 //Destroy the region with the given name, freeing all memory associated with it. 
