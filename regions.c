@@ -60,7 +60,16 @@ void rdump(void);
 Boolean rinit(const char * region_name, r_size_t region_size)
 {
     Boolean result = false; //return value
-    //check the name of the region is already used or not    
+    //check the name of the region is already used or not 
+    if(region_size <= 0)
+    {//case the regions_size is less than or equal to 0
+        return result;
+    }   
+    if(region_size % 8 != 0)
+    {//check the size of the region is multiple of 8
+      region_size = region_size + (8 - region_size % 8);//round the size if region size is not a multiple of 8
+      
+    }  
     if (head == NULL)
     { //case 0 number of region.
         result = true;
