@@ -327,13 +327,25 @@ void rdump(void)
         return ;
     }
     struct Node *curr = head;
+    struct Node_m *block;
     int freeSpace;
+    int count = 1;
     while(curr != NULL)
     {
         //print basic information
+        block = curr->data.block;
        freeSpace = curr->data.size - curr->data.occupied;
        printf("Name of Region: %s\nMaximum Size of Region: %d\nMemory been occuppied: %d\n", curr->data.name, curr->data.size, curr->data.occupied);
        printf("Free space: %d\n",freeSpace);
+       while(block != NULL)
+       {
+           printf("Block #%d:\n",count);
+           printf("Address: %p\n",curr->data.block);
+           printf("Size of block: %d\n",curr->data.block->sizeOfBlock);
+           count++;
+           block = block->next;
+       }
+       count = 1;
        curr = curr->next;
        
     }
