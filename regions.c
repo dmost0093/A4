@@ -323,7 +323,7 @@ void rdump(void)
     
     if(head == NULL || currNode == NULL)
     {//case there is no region to print
-        printf("There is no region to print");
+        printf("There is no region to print\n");
         return ;
     }
     struct Node *curr = head;
