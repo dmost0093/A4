@@ -166,7 +166,9 @@ void *ralloc(r_size_t block_size)
 {
     void *result_ptr = (struct Node_m*) malloc(sizeof(struct Node_m));
     struct Node *curr = currNode;
+    struct Node_m *lastBlock;//last block in the region
     assert(curr != NULL);
+    
     if(block_size <= 0 || curr->data.size < (curr->data.occupied) + block_size)
     {//case the given size of the block is 0
     //case that occupied memory size reach or will over the maximum size of memory
@@ -175,17 +177,24 @@ void *ralloc(r_size_t block_size)
     else
     {
         if(curr->data.occupied == 0)
-        {
+        {//case the head(block) is empty
             curr->data.block->sizeOfBlock = block_size;
             curr->data.occupied += block_size;
             result_ptr = curr->data.block;
         }
         else
-        {
-            struct Node_m *newBlock = (struct Node_m*) malloc(sizeof(struct Node_m));
+        {   
+            //create new block
+            struct Node_m *newBlock = (struct Node_m*) malloc(sizeof(struct Node_m));            
             newBlock->sizeOfBlock = block_size;
             newBlock->next = NULL;
-            curr->data.block->next = newBlock;
+            lastBlock = curr->data.block;//assign the lastBlock as head of the block list
+            //search for last block in the list
+            while(lastBlock->next)
+            {
+                lastBlock = lastBlock->next;
+            }
+            lastBlock->next = newBlock;
             curr->data.occupied += block_size;
             result_ptr = newBlock;
         }
@@ -209,21 +218,48 @@ Boolean rfree(void *block_ptr)
 {
     Boolean result;
     result = false;
-    struct Node_m* temp = NULL;
-    struct Node_m* curr = curr->data.block;
-    if(curr == (struct Node_m*)block_ptr)
+    
+    if(block_ptr == NULL||head == NULL)
+    {//case the given pointer is NULL or the list of block is empty
+        printf("ERROR\n");
+        return result;
+    }
+    struct Node_m* temp = (struct Node_m*)block_ptr;
+    struct Node_m* curr = currNode->data.block;//point the head of the block list
+    struct Node_m* prev = NULL;//point the previous block
+    while(temp != curr)
     {
+        if(curr->next == NULL)
+        {//case the last block
+            return result;
+        }
+        else
+        {
+            //save the reference to current block
+            prev = curr;
+            //move to next block
+            curr = curr->next;
+        }
+    }
+    //found the match
+    //update the block
+    if(currNode->data.block == temp)
+    {//case first block
+        //update the data in region
+        currNode->data.occupied = (currNode->data.occupied)-(temp->sizeOfBlock);
+        //update the link
         currNode->data.block = currNode->data.block->next;
-        free(block_ptr);
+        result = true;
     }
     else
     {
-        temp = (struct Node_m*)block_ptr;
-        while(temp != curr)
-        {
-            
-        }
+        //update the data in region
+        currNode->data.occupied = (currNode->data.occupied)-(temp->sizeOfBlock);
+        //update the link
+        prev->next = curr->next;
+        result = true;
     }
+    free(block_ptr);
     return result;
 }
 //Destroy the region with the given name, freeing all memory associated with it. 
