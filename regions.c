@@ -65,11 +65,11 @@ Boolean rinit(const char * region_name, r_size_t region_size)
     {//case the regions_size is less than or equal to 0
         return result;
     }   
-    if(region_size % 8 != 0)
-    {//check the size of the region is multiple of 8
-      region_size = region_size + (8 - region_size % 8);//round the size if region size is not a multiple of 8
-      
-    }  
+        if(region_size % 8 != 0)
+        {//check the size of the region is multiple of 8
+        region_size = region_size + (8 - region_size % 8);//round the size if region size is not a multiple of 8
+        
+        }  
     if (head == NULL)
     { //case 0 number of region.
         result = true;
@@ -99,7 +99,7 @@ Boolean rinit(const char * region_name, r_size_t region_size)
         {//check the name of region is unique
             if (check.name == region_name)
             { //case the region name used already.
-                printf("The region name (%s) has been already used\n", region_name);
+                
                 return result; //return false
             }
             //update the current node and data stored in node
@@ -164,12 +164,16 @@ Boolean rchoose(const char *region_name)
 //Allocate a block that is the given number of bytes.
 void *ralloc(r_size_t block_size)
 {
+    if(block_size % 8 != 0)
+    {//check the size of the region is multiple of 8
+        block_size = block_size + (8 - block_size % 8);//round the size if region size is not a multiple of 8
+    }  
     void *result_ptr = (struct Node_m*) malloc(sizeof(struct Node_m));
-    struct Node *curr = currNode;
-    struct Node_m *lastBlock;//last block in the region
-    assert(curr != NULL);
-    
-    if(block_size <= 0 || curr->data.size < (curr->data.occupied) + block_size)
+    struct Node *curr = currNode;    
+    r_size_t max, occupiedSize;
+    max = curr->data.size;
+    occupiedSize = curr->data.occupied + block_size;
+    if(block_size <= 0 || max < occupiedSize)
     {//case the given size of the block is 0
     //case that occupied memory size reach or will over the maximum size of memory
         return NULL;
@@ -179,28 +183,24 @@ void *ralloc(r_size_t block_size)
         if(curr->data.occupied == 0)
         {//case the head(block) is empty
             curr->data.block->sizeOfBlock = block_size;
-            curr->data.occupied += block_size;
+            curr->data.occupied = block_size;
             result_ptr = curr->data.block;
         }
         else
         {   
             //create new block
-            struct Node_m *newBlock = (struct Node_m*) malloc(sizeof(struct Node_m));            
+            struct Node_m *newBlock = (struct Node_m*) malloc(sizeof(struct Node_m));  
+                 
             newBlock->sizeOfBlock = block_size;
-            newBlock->next = NULL;
-            lastBlock = curr->data.block;//assign the lastBlock as head of the block list
+            newBlock->next = curr->data.block;
+            curr->data.block = newBlock;
             //search for last block in the list
-            while(lastBlock->next)
-            {
-                lastBlock = lastBlock->next;
-            }
-            lastBlock->next = newBlock;
-            curr->data.occupied += block_size;
+            curr->data.occupied = occupiedSize;
             result_ptr = newBlock;
         }
         
     }
-    return result_ptr;
+    return result_ptr;  
 }
 //Find out how many of memory been allocated inside a block
 r_size_t rsize(void *block_ptr)
@@ -221,7 +221,7 @@ Boolean rfree(void *block_ptr)
     
     if(block_ptr == NULL||head == NULL)
     {//case the given pointer is NULL or the list of block is empty
-        printf("ERROR\n");
+        
         return result;
     }
     struct Node_m* temp = (struct Node_m*)block_ptr;
@@ -265,86 +265,77 @@ Boolean rfree(void *block_ptr)
 //Destroy the region with the given name, freeing all memory associated with it. 
 void rdestroy(const char *region_name)
 {
+    Boolean stop = true;
     if(head == NULL)
     {//case there is 0 regions.
-        return ;
+        stop = false;
     }
-    struct Node *temp = head;//the node from list that store data for region
-    struct Node_m *blockD;//block that will be destroyed
-    Region regionD; //region that will be destroyed
-    if(head->data.name == region_name||currNode->data.name == region_name)
-    {//case destroying head or currently selected region
-        //change the head to next node.
-        if(head->data.name == region_name)
-        {
-            temp = head;
-            regionD = temp->data;
-            head = head->next;
-        }
-        //change the currNode(currently selected region) to head.
-        if(currNode->data.name == region_name)
-        {
-            temp = currNode;
-            regionD = temp->data;
-            currNode = head;
-        }
-        
-        //destroy the all the block in the region
-        while(regionD.block->next != NULL)
-        {
-            blockD = regionD.block;
-            regionD.block = regionD.block->next;
-            free(blockD);
-        }
-        free(temp);
-    }
-    else
+    struct Node* curr = head;
+    struct Node* prev;
+    
+    while(curr->data.name != region_name||stop)
     {
-        //find the region that given by the region name
-        while(temp->data.name != region_name)
+        if(curr->next == NULL)
         {
-            //if it is last node
-            if(temp->next == NULL)
-            {
-                printf("Enter wrong region name or regions is not appear in the list");
-                return ;
+           
+            stop = false;
+        }
+        else
+        {
+            prev = curr;
+            curr = curr->next;
+        }
+    }
+    //found the region
+    if(curr->data.name == region_name)
+    {
+        //case last region
+        if(head->next == NULL)
+        {
+            curr = head;
+            head = NULL;
+            currNode = NULL;
+        }
+        //case first region
+        if(curr == head && head->next != NULL)
+        {
+            if(curr == currNode)
+            {//case currently selected region are same as first region in the list
+                currNode = head->next;
+                head = head->next;
             }
             else
             {
-                temp = temp->next;
+                head = head->next;
             }
         }
-        //update the region and block need to be destroy
-        regionD = temp->data;
-        blockD = regionD.block;
-        //destroy the block in region
-        while(regionD.block->next != NULL)
+        else
         {
-            blockD = regionD.block;
-            regionD.block = regionD.block->next;
-            free(blockD);
+            currNode = prev;
+            currNode->next = curr->next;
         }
-        free(temp);
+        free(curr);
     }
-    return ;
 }
+//Print all data structures, but not block contents.
 void rdump(void)
 {
-    if(head == NULL)
+    
+    if(head == NULL || currNode == NULL)
     {//case there is no region to print
         printf("There is no region to print");
         return ;
     }
     struct Node *curr = head;
-    int freeSpace, freeSpaceP;
+    int freeSpace;
     while(curr != NULL)
     {
         //print basic information
-        freeSpace = curr->data.size - curr->data.occupied;
-        freeSpaceP = (freeSpace / curr->data.size) * 100;
-        printf("Name of Region: %s, Maximum Size of Region: %d, Memory been occuppied: %d", curr->data.name, curr->data.size, curr->data.occupied);
-        printf(" Free space: %d(%d%%)\n",freeSpace, freeSpaceP);
-        curr = curr->next;
+       freeSpace = curr->data.size - curr->data.occupied;
+       printf("Name of Region: %s\nMaximum Size of Region: %d\nMemory been occuppied: %d\n", curr->data.name, curr->data.size, curr->data.occupied);
+       printf("Free space: %d\n",freeSpace);
+       curr = curr->next;
+       
     }
-    
+    return ;
 }
