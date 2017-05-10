@@ -59,6 +59,7 @@ void rdump(void);
 //Create and initialize a region with the given name and the given size
 Boolean rinit(const char * region_name, r_size_t region_size)
 {
+    printf("chang");
     Boolean result = false; //return value
     //check the name of the region is already used or not 
     if(region_size <= 0)
